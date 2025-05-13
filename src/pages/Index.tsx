@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Lightbulb, Brain, ChevronDown, ChevronUp, Upload, FileText } from "lucide-react";
+import { Lightbulb, Brain, ChevronDown, ChevronUp, Upload, FileText, RefreshCw } from "lucide-react";
 import QuestionCard from "@/components/QuestionCard";
 import { technicalQuestions, behavioralQuestions } from "@/data/mockQuestions";
 
@@ -17,6 +17,7 @@ const Index = () => {
     technical: technicalQuestions,
     behavioral: behavioralQuestions
   });
+  const [isGeneratingNewQuestions, setIsGeneratingNewQuestions] = useState(false);
 
   const handleSubmit = () => {
     // In a real implementation, this would process the JD and resume with AI
@@ -28,6 +29,25 @@ const Index = () => {
     setSubmitted(false);
     setJobDescription('');
     setResume('');
+  };
+
+  // Function to generate new questions
+  const generateNewQuestions = () => {
+    setIsGeneratingNewQuestions(true);
+    
+    // Simulate API call delay
+    setTimeout(() => {
+      // Shuffle mock questions to simulate new ones
+      const shuffledTechnical = [...technicalQuestions].sort(() => Math.random() - 0.5);
+      const shuffledBehavioral = [...behavioralQuestions].sort(() => Math.random() - 0.5);
+      
+      setQuestionsData({
+        technical: shuffledTechnical,
+        behavioral: shuffledBehavioral
+      });
+      
+      setIsGeneratingNewQuestions(false);
+    }, 1000);
   };
 
   return (
@@ -84,15 +104,35 @@ const Index = () => {
           </Card>
         ) : (
           <div className="max-w-4xl mx-auto">
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
               <h2 className="text-2xl font-semibold bg-gradient-to-r from-interview-primary to-interview-secondary bg-clip-text text-transparent">为你定制的面试问题</h2>
-              <Button 
-                variant="outline" 
-                onClick={resetForm}
-                className="border-interview-primary text-interview-primary hover:bg-interview-primary/10"
-              >
-                重新输入
-              </Button>
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={resetForm}
+                  className="border-interview-primary text-interview-primary hover:bg-interview-primary/10"
+                >
+                  重新输入
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={generateNewQuestions}
+                  disabled={isGeneratingNewQuestions}
+                  className="border-interview-secondary text-interview-secondary hover:bg-interview-secondary/10 flex gap-2 items-center"
+                >
+                  {isGeneratingNewQuestions ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                      生成中...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4" />
+                      换一批问题
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
@@ -117,7 +157,7 @@ const Index = () => {
                 <div className="space-y-6">
                   {questionsData.technical.map((question, index) => (
                     <QuestionCard 
-                      key={`tech-${index}`}
+                      key={`tech-${index}-${question.text.substring(0, 10)}`}
                       question={question}
                       type="technical"
                       index={index}
@@ -130,7 +170,7 @@ const Index = () => {
                 <div className="space-y-6">
                   {questionsData.behavioral.map((question, index) => (
                     <QuestionCard 
-                      key={`behav-${index}`}
+                      key={`behav-${index}-${question.text.substring(0, 10)}`}
                       question={question}
                       type="behavioral"
                       index={index}

@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, CheckCircle, AlertCircle, MessageSquare } from "lucide-react";
+import { ChevronDown, ChevronUp, CheckCircle, AlertCircle, MessageSquare, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface QuestionCardProps {
@@ -23,6 +23,7 @@ const QuestionCard = ({ question, type, index }: QuestionCardProps) => {
   const [showAnswer, setShowAnswer] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [feedback, setFeedback] = useState('');
+  const [solved, setSolved] = useState(false);
 
   const handleSubmit = () => {
     // In a real implementation, this would send the answer to an AI for feedback
@@ -39,6 +40,10 @@ const QuestionCard = ({ question, type, index }: QuestionCardProps) => {
     setExpanded(!expanded);
   };
 
+  const markAsSolved = () => {
+    setSolved(true);
+  };
+
   const getDifficultyColor = (difficulty: 'easy' | 'medium' | 'hard') => {
     switch (difficulty) {
       case 'easy':
@@ -53,7 +58,9 @@ const QuestionCard = ({ question, type, index }: QuestionCardProps) => {
   };
 
   const getCardGradient = () => {
-    if (type === 'technical') {
+    if (solved) {
+      return 'border-l-4 border-l-green-500 bg-gradient-to-r from-green-50 to-white';
+    } else if (type === 'technical') {
       return 'border-l-4 border-l-interview-technical bg-gradient-to-r from-interview-technical/5 to-white';
     } else {
       return 'border-l-4 border-l-interview-behavioral bg-gradient-to-r from-interview-behavioral/5 to-white';
@@ -86,7 +93,19 @@ const QuestionCard = ({ question, type, index }: QuestionCardProps) => {
     >
       <CardContent className="pt-6">
         <div className="flex justify-between items-start mb-4">
-          <h3 className="text-lg font-medium leading-relaxed pr-4">{question.text}</h3>
+          <div className="flex items-start">
+            {solved && (
+              <span className="mr-2 bg-green-100 text-green-800 p-1 rounded-full">
+                <Check className="h-4 w-4" />
+              </span>
+            )}
+            <h3 className={cn(
+              "text-lg font-medium leading-relaxed pr-4",
+              solved && "text-gray-500 line-through decoration-green-500/30 decoration-2"
+            )}>
+              {question.text}
+            </h3>
+          </div>
           <Badge className={cn("flex items-center px-2 py-1 rounded-full border", getDifficultyColor(question.difficulty))}>
             {difficultyIcon[question.difficulty]}
             {difficultyLabel[question.difficulty]}
@@ -102,7 +121,7 @@ const QuestionCard = ({ question, type, index }: QuestionCardProps) => {
                   value={userAnswer}
                   onChange={(e) => setUserAnswer(e.target.value)}
                   className="min-h-[150px] border-gray-300 focus:ring-2 focus:ring-interview-primary/40 focus:border-interview-primary transition-all"
-                  disabled={submitted}
+                  disabled={submitted || solved}
                 />
                 
                 {submitted && (
@@ -118,7 +137,7 @@ const QuestionCard = ({ question, type, index }: QuestionCardProps) => {
                 )}
 
                 <div className="flex flex-wrap gap-3 pt-2">
-                  {!submitted && (
+                  {!submitted && !solved && (
                     <Button 
                       onClick={handleSubmit}
                       disabled={userAnswer.trim() === ''}
@@ -130,6 +149,15 @@ const QuestionCard = ({ question, type, index }: QuestionCardProps) => {
                       )}
                     >
                       提交回答
+                    </Button>
+                  )}
+                  {(submitted || userAnswer.trim() !== '') && !solved && (
+                    <Button 
+                      variant="outline" 
+                      onClick={markAsSolved}
+                      className="border-green-500 text-green-600 hover:bg-green-50 flex items-center gap-2"
+                    >
+                      <Check size={16} /> 标记为已解决
                     </Button>
                   )}
                   <Button 
@@ -150,16 +178,27 @@ const QuestionCard = ({ question, type, index }: QuestionCardProps) => {
               <div className="p-5 bg-gray-50 rounded-lg border border-gray-100">
                 <h4 className="font-medium mb-3 text-gray-700">参考答案:</h4>
                 <p className="text-gray-700 leading-relaxed whitespace-pre-line">{question.modelAnswer}</p>
-                <Button 
-                  variant="link" 
-                  onClick={() => setShowAnswer(false)}
-                  className={cn(
-                    "px-0 mt-3",
-                    type === 'technical' ? "text-interview-technical" : "text-interview-behavioral"
+                <div className="flex items-center gap-3 mt-4">
+                  <Button 
+                    variant="link" 
+                    onClick={() => setShowAnswer(false)}
+                    className={cn(
+                      "px-0",
+                      type === 'technical' ? "text-interview-technical" : "text-interview-behavioral"
+                    )}
+                  >
+                    返回
+                  </Button>
+                  {!solved && (
+                    <Button 
+                      variant="outline" 
+                      onClick={markAsSolved}
+                      className="border-green-500 text-green-600 hover:bg-green-50 flex items-center gap-2"
+                    >
+                      <Check size={16} /> 标记为已解决
+                    </Button>
                   )}
-                >
-                  返回
-                </Button>
+                </div>
               </div>
             )}
           </div>
