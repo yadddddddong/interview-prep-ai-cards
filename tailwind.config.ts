@@ -64,11 +64,11 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				interview: {
-					primary: '#2563EB',
-					secondary: '#7C3AED',
+					primary: '#4F46E5', // Indigo 600
+					secondary: '#8B5CF6', // Violet 500
 					light: '#F5F7FF',
-					technical: '#3B82F6',
-					behavioral: '#8B5CF6',
+					technical: '#3B82F6', // Blue 500
+					behavioral: '#8B5CF6', // Violet 500
 				}
 			},
 			borderRadius: {
@@ -96,18 +96,27 @@ export default {
 				'card-appear': {
 					'0%': {
 						opacity: '0',
-						transform: 'translateY(10px)'
+						transform: 'translateY(15px)'
 					},
 					'100%': {
 						opacity: '1',
 						transform: 'translateY(0)'
 					}
+				},
+				'pulse-soft': {
+					'0%, 100%': {
+						opacity: '1',
+					},
+					'50%': {
+						opacity: '0.8',
+					},
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'card-appear': 'card-appear 0.3s ease-out'
+				'card-appear': 'card-appear 0.4s ease-out',
+				'pulse-soft': 'pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
 			}
 		}
 	},
